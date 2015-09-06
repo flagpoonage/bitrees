@@ -33,7 +33,6 @@ server.register(require('vision'), function(err) {
     relativeTo: Path.join(__dirname),
     path: 'views',
     partialsPath: 'views/partial',
-    helpersPath: 'views/helpers',
     isCached: false
   });
 
