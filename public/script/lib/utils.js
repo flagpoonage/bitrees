@@ -10,6 +10,14 @@
       target.addEventListener(evt, listener);
     },
 
+    each: function(array, fn, context) {
+      context = BT.U.df(context) ? context : this;
+
+      for(var i = 0; i < array.length; i++) {
+        fn.call(context, array[i]);
+      }
+    },
+
     fixContext: function(o) {
       for(var i in o) {
         if(o.hasOwnProperty(i) && BT.U.fn(o[i])) {
