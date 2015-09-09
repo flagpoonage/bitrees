@@ -1,11 +1,11 @@
 window.D = document;
 window.W = window;
 
-BT.U.on('DOMContentLoaded', D, function() {
+BT.U.ready(function() {
   BT.log('Content loaded');
 
   var Thing = BT.make({
-    constructor: function() {
+    init: function() {
       this.value = 200;
     },
 
@@ -19,8 +19,12 @@ BT.U.on('DOMContentLoaded', D, function() {
   });
 
   var Other = BT.extend(Thing, {
-    otherFunction: function() {
-      BT.log('It worked!', this);
+    init: function() {
+      this.value2 = 300;
+    },
+
+    getValue: function() {
+      return [this.value, this.value2];
     }
   });
 
@@ -33,6 +37,10 @@ BT.U.on('DOMContentLoaded', D, function() {
   BT.log(t, t.getValue());
   BT.log(o, o.getValue());
   BT.log(c, c.getValue());
+
+  var q = new BT.App.EventBase();
+
+  BT.log(q);
 
   o.otherFunction();
 });

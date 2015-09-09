@@ -10,6 +10,10 @@
       target.addEventListener(evt, listener);
     },
 
+    ready: function(listener) {
+      document.addEventListener('DOMContentLoaded', listener);
+    },
+
     each: function(array, fn, context) {
       context = BT.U.df(context) ? context : this;
 
