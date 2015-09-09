@@ -29,10 +29,10 @@ server.register(require('vision'), function(err) {
   }
 
   server.views({
-    engines: { html: require('hapi-dust') },
+    engines: { dust: require('hapi-dust') },
     relativeTo: Path.join(__dirname),
     path: 'views',
-    partialsPath: 'views/partial',
+    partialsPath: 'views',
     isCached: false
   });
 
@@ -55,7 +55,7 @@ server.register(require('inert'), function (err) {
 });
 
 var home = function(request, reply) {
-  reply.view('base.html', { text: 'Hea lo' });
+  reply.view('base', { text: 'Hea lo' });
 };
 
 server.route([

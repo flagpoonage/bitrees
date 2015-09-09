@@ -14,10 +14,13 @@
 
   var defaultExtendOptions = function(options) {
     options = BT.U.df(options, {});
-    options.preserveConstructionChain = BT.U.df(options.preserveConstructionChain, true);
+    options.initInheritance = BT.U.df(options.initInheritance, true);
+
+    return options;
   };
 
   var core = {
+    Global: {},
     makeEvents: function() {
       return new BT.Events();
     },
@@ -32,9 +35,7 @@
       var proto = protoFn(base);
 
       for(var i in obj) {
-        if(BT.U.hop(obj, i)) {
-          proto.prototype[i] = obj[i];
-        }
+        if(BT.U.hop(obj, i)) { proto.prototype[i] = obj[i]; }
       }
 
       proto.prototype.init = BT.U.fn(obj.init, function() {});
@@ -42,17 +43,27 @@
       return proto;
     },
 
+    makeGlobal: function(obj) {
+      return new (BT.make(obj))();
+    },
+
     extend: function(type, obj, options) {
       options = defaultExtendOptions(options);
-      var proto = BT.make(obj, type);
+      var proto = BT.make(obj, options.initInheritance ? type : undefined);
 
       for(var i in type.prototype) {
         if(BT.U.hop(type.prototype, i) && i !== 'init') {
-          proto.prototype[i] = type.prototype[i];
+          if(!BT.U.df(proto.prototype[i])) {
+            proto.prototype[i] = type.prototype[i];
+          }
         }
       }
 
       return proto;
+    },
+
+    extendGlobal: function(type, obj, options) {
+      return new (BT.extend(type, obj, options))();
     }
   };
 

@@ -40,6 +40,6 @@
     }
   };
 
-  window.BT.Events = EventsObject;
-  window.BT.events = window.BT.makeEvents();
+  BT.Events = EventsObject;
+  BT.events = BT.makeEvents();
 })();

@@ -6,20 +6,16 @@
   var str = 'string';
 
   BT.U = {
-    on: function(evt, target, listener) {
-      target.addEventListener(evt, listener);
-    },
-
-    ready: function(listener) {
-      document.addEventListener('DOMContentLoaded', listener);
-    },
-
     each: function(array, fn, context) {
       context = BT.U.df(context) ? context : this;
 
       for(var i = 0; i < array.length; i++) {
         fn.call(context, array[i]);
       }
+    },
+
+    first: function(val) {
+      return BT.U.df(val[0]) ? val[0] : val;
     },
 
     fixContext: function(o) {

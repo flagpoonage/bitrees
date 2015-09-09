@@ -8,9 +8,16 @@
     <div>
       Is what i'm saying
     </div>
+
+    <div bitrees="template-container">
+      {> "templates/node" /}
+    </div>
+
     <script type="text/javascript" src="script/lib/core.js"></script>
     <script type="text/javascript" src="script/lib/utils.js"></script>
+    <script type="text/javascript" src="script/lib/html.js"></script>
     <script type="text/javascript" src="script/lib/events.js"></script>
+    <script type="text/javascript" src="script/app/global/template_loader.js"></script>
     <script type="text/javascript" src="script/app/core/application.js"></script>
     <script type="text/javascript" src="script/app/core/core_base.js"></script>
     <script type="text/javascript" src="script/app/core/event_base.js"></script>

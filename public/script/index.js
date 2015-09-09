@@ -1,7 +1,7 @@
 window.D = document;
 window.W = window;
 
-BT.U.ready(function() {
+BT.H.ready(function() {
   BT.log('Content loaded');
 
   var Thing = BT.make({
@@ -28,7 +28,11 @@ BT.U.ready(function() {
     }
   });
 
-  var Custom = BT.extend(Other, {});
+  var Custom = BT.extend(Other, {
+    init: function() {
+      this.value3 = 400;
+    }
+  }, { initInheritance: false });
 
   var t = new Thing();
   var o = new Other();
@@ -41,6 +45,4 @@ BT.U.ready(function() {
   var q = new BT.App.EventBase();
 
   BT.log(q);
-
-  o.otherFunction();
 });
