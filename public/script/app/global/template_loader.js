@@ -1,5 +1,6 @@
 (function() {
   BT.Templates = BT.makeGlobal({
+
     init: function() {
       this.templates = {};
       this.core = BT.H.$(BT.H.selector('template-container') + ' script[type="text/html"]');
@@ -18,6 +19,7 @@
 
     get: function(name) {
       return this.templates[name];
-    }
+    },
+
   });
 })();
