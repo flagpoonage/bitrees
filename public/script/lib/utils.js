@@ -26,6 +26,29 @@
       }
     },
 
+    isntObject: function(x) {
+      return BT.U.st(x) || !isNaN(x) || x.isArray || x instanceof Date;
+    },
+
+    isObject: function(x) {
+      return !BT.U.st(x) && isNaN(x) && !x.isArray && !(x instanceof Date);
+    },
+
+    ar: function(x, o) {
+      var r = x.isArray;
+      return typeof o === udf ? r : (r ? x : o);
+    },
+
+    dt: function(x, o) {
+      var r = x instanceof Date;
+      return typeof o === udf ? r : (r ? x : o);
+    },
+
+    nm: function(x, o) {
+      var r = !isNaN(x);
+      return typeof o === udf ? r : (r ? x : o);
+    },
+
     fn: function(x, o) {
       var r = typeof x === fun;
       return typeof o === udf ? r : (r ? x : o);

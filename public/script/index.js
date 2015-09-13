@@ -1,48 +1,32 @@
 window.D = document;
 window.W = window;
 
+
+
 BT.H.ready(function() {
-  BT.log('Content loaded');
+  var app = new BT.App();
 
-  var Thing = BT.make({
-    init: function() {
-      this.value = 200;
+  var tree = {
+    name: 'root',
+    
+    value2: {
+      name: 'Some checkbox item',
+      type: BT.E.nodeType.CHECK,
+      value: true
     },
 
-    getValue: function() {
-      return this.value;
-    },
+    value3: {
+      name: 'Some other item',
+      type: BT.E.nodeType.CHECK,
+      value: false,
+    }
 
-    setValue: function(value) {
-      this.value = value;
+  };
+
+  app.loadTree({
+    name: 'root',
+    value2: {
+
     }
   });
-
-  var Other = BT.extend(Thing, {
-    init: function() {
-      this.value2 = 300;
-    },
-
-    getValue: function() {
-      return [this.value, this.value2];
-    }
-  });
-
-  var Custom = BT.extend(Other, {
-    init: function() {
-      this.value3 = 400;
-    }
-  }, { initInheritance: false });
-
-  var t = new Thing();
-  var o = new Other();
-  var c = new Custom();
-
-  BT.log(t, t.getValue());
-  BT.log(o, o.getValue());
-  BT.log(c, c.getValue());
-
-  var q = new BT.App.EventBase();
-
-  BT.log(q);
 });

@@ -61,7 +61,7 @@ var home = function(request, reply) {
 server.route([
   {
     method: 'GET',
-    path: '/start',
+    path: '/',
     config: {
       handler: home
     }

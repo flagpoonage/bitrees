@@ -14,6 +14,7 @@
     </div>
 
     <script type="text/javascript" src="script/lib/core.js"></script>
+    <script type="text/javascript" src="script/lib/enums.js"></script>
     <script type="text/javascript" src="script/lib/utils.js"></script>
     <script type="text/javascript" src="script/lib/html.js"></script>
     <script type="text/javascript" src="script/lib/events.js"></script>
