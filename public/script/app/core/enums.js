@@ -1,5 +1,5 @@
 (function() {
-  BT.E = {
+  BT.App.Enums = {
     nodeType: {
       CHECK: 'check',
       LINK: 'link',

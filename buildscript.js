@@ -5,7 +5,7 @@ var eol = require('eol');
 var rg_file = new RegExp(/^-F *$/);
 var rg_tree = new RegExp(/^-T *$/);
 var rg_cmt = new RegExp(/(\/\/.*)$/);
-var root_path = './build';
+var root_path = './public/script';
 var jsmap_type = '.jsmap';
 
 (function() {
@@ -17,6 +17,23 @@ var jsmap_type = '.jsmap';
   var isOfType = function(f, ext) {
     var index = f.lastIndexOf(ext);
     return index === f.length - ext.length;
+  };
+
+  var lineify = function(data) {
+    return eol.lf(data).split('\n');
+  };
+
+  var addExtension = function(name, new_ext) {
+    if(name.indexOf(new_ext) !== name.length - new_ext.length) {
+      return name + new_ext;
+    }
+
+    return name;
+  };
+
+  var changeExtension = function(name, new_ext) {
+    var dotidx = name.lastIndexOf('.');
+    return (dotidx === -1) ? name + new_ext : name.substring(0, dotidx) + new_ext;
   };
 
   var fileReadComplete = function(name) {
@@ -35,9 +52,87 @@ var jsmap_type = '.jsmap';
       file_counter--;
 
       if(file_counter === 0 && hasTraversed) {
-        buildFileMapping();
+        startFileMappings();
       }
     };
+  };
+
+  var startFileMappings = function() {
+    for(var i in maps) {
+      if(maps.hasOwnProperty(i)) {
+
+        buildFileMapping(changeExtension(i, '.js'), maps[i].data);
+      }
+    }
+  };
+
+  var buildFileMapping = function(name, data) {
+    var output = [];
+
+    data.forEach(function(map_section) {
+      if(map_section.type === 'tree') {
+        var files = readTrees(map_section.values);
+        output = output.concat(files);
+      }
+      else {
+        output = output.concat(map_section.values);
+      }
+    });
+
+    console.log('Build structure:\n', output);
+    readFileData(name, output);
+  };
+
+  var readFileData = function(name, values) {
+    var readyToWrite = false;
+    var dataBuffer = [];
+    var readCounter = 0;
+
+    values.forEach(function(file, index, array) {
+      readCounter++;
+      var fname_true = addExtension(file, '.js');
+      console.log('Reading file ', fname_true)
+      fs.readFile(fname_true, 'utf8', function(err, data) {
+        if(err) {
+          console.log('Error reading file [' + file + '] ->\n', err);
+          process.exit(1);
+        }
+
+        array[index] = data;
+        readCounter--;
+
+        if(readCounter === 0 && readyToWrite) {
+          writeFile(name, array.join(''));
+        }
+      });
+    });
+
+    readyToWrite = true;
+  };
+
+  var writeFile = function(name, data) {
+    console.log(data);
+    fs.writeFileSync(name, data);
+  };
+
+  var readTrees = function(values) {
+    output = [];
+
+    values.forEach(function(tree) {
+      var tree_contents = fs.readdirSync(tree);
+
+      tree_contents.forEach(function(file) {
+        var fpath = path.join(tree, file);
+        if(fs.lstatSync(fpath).isDirectory() || !isOfType(fpath, '.js')) {
+          return;
+        }
+        else {
+          output.push(fpath);
+        }
+      });
+    });
+
+    return output;
   };
 
   var parseData = function(data) {
@@ -45,66 +140,58 @@ var jsmap_type = '.jsmap';
 
     var output = [];
 
-    var mode = 'none';
+    var options = {
+      mode: 'mode'
+    };
 
-    lines.forEach(function(line, i, a) {
-      line = line.trim();
-      if(line.length === 0) {
-        return;
-      }
-
-      if(rg_tree.test(line)) {
-        mode = 'tree';
-        output.push({
-          type: 'tree',
-          values: []
-        });
-
-        return;
-      }
-
-      if(rg_file.test(line)) {
-        mode = 'file';
-        output.push({
-          type: 'file',
-          values: []
-        });
-
-        return;
-      }
-
-      if(mode === 'none') {
-        return;
-      }
-
-      var matches = [];
-      var trueline = line;
-      while((matches = rg_cmt.exec(trueline)) !== null) {
-        console.log(matches);
-        trueline = trueline.replace(matches[1], '');
-      }
-
-      trueline = trueline.trim();
-
-      if(trueline.length === 0) {
-        return;
-      }
-
-      output[output.length -1].values.push(path.join(root_path, trueline));
+    lines.forEach(function(line) {
+      parseLine(line, output, options);
     });
 
     return output;
   };
 
-  var lineify = function(data) {
-    return eol.lf(data).split('\n');
+  var parseLine = function(line, output, options) {
+    line = line.trim();
+    if(line.length === 0) {
+      return;
+    }
+
+    var new_mode = rg_tree.test(line) ? 'tree' : (rg_file.test(line) ? 'file' : options.mode);
+
+    if(new_mode === 'none') {
+      return;
+    }
+    else if (new_mode !== options.mode) {
+      output.push({
+        type: new_mode,
+        values: []
+      });
+
+      options.mode = new_mode;
+      return;
+    }
+
+    var matches = [];
+    var trueline = line;
+    while((matches = rg_cmt.exec(trueline)) !== null) {
+      console.log(matches);
+      trueline = trueline.replace(matches[1], '');
+    }
+
+    trueline = trueline.trim();
+
+    if(trueline.length === 0) {
+      return;
+    }
+
+    output[output.length -1].values.push(path.join(root_path, trueline));
   };
 
-  contents.forEach(function(val, i, a) {
-    var f = path.join(root_path, val);
+  contents.forEach(function(file) {
+    var f = path.join(root_path, file);
 
     if(fs.lstatSync(f).isDirectory() || !isOfType(f, jsmap_type)) {
-      console.log('fail');
       return;
     }
 
@@ -113,96 +200,4 @@ var jsmap_type = '.jsmap';
   });
 
   hasTraversed = true;
-
 })();
-
-/*var match_rgx = new RegExp(/\/\/\-\-\s*([\w\\\/\.]+)\s*$/gm);
-var del_rgx = new RegExp(/^(\/\/\-\-\s*[\w\\\/\.]+\s*\n)/gm);
-var root_path = './build';
-
-(function() {
-
-  var file_counter = 0;
-  var hasTraversed = false;
-  var tree = [];
-  var placement = [];
-
-  var isJavascriptFile = function(f) {
-    var ext = '.js';
-    var index = f.lastIndexOf(ext);
-    return index === f.length - ext.length;
-  };
-
-  var traverse = function(p) {
-    var output = [];
-    var contents = fs.readdirSync(p);
-
-    contents.forEach(function(val, i, array) {
-      var f = path.join(p, val);
-      var isDirectory = fs.lstatSync(f).isDirectory();
-
-      if(isDirectory) {
-        traverse(f);
-      }
-      else if(isJavascriptFile(f)) {
-        file_counter++;
-        fs.readFile(f, 'utf8', fileReadComplete(f));
-      }
-    });
-
-    return output;
-  };
-
-  var fileReadComplete = function(name) {
-    return function(err, data) {
-      if(err) {
-        console.log('Error ->', err);
-        process.exit(1);
-      }
-
-      tree.push({
-        name: name,
-        data: eol.lf(data),
-        dependencies: []
-      });
-
-      file_counter--;
-
-      if(file_counter === 0 && hasTraversed) {
-        buildTreeDependencies();
-      }
-    };
-  };
-
-
-  var buildTreeDependencies = function() {
-    tree.forEach(function(val, i, array) {
-      var dp = [];
-      var matches = [];
-
-      while((matches = match_rgx.exec(val.data)) !== null) {
-        val.dependencies.push(path.join(root_path, matches[1]));
-      }
-
-      if(val.dependencies.length === 0) {
-        placement.push(val.name);
-      }
-
-      val.data = val.data.replace(del_rgx, '');
-    });
-
-    orderTreeDependencies();
-  };
-
-  var orderTreeDependencies = function() {
-    tree.forEach(function(val, i, array) {
-      if(val.dependencies.length > 0) {
-
-      }
-    });
-  };
-
-  traverse(root_path);
-  hasTraversed = true;
-})();
-*/
